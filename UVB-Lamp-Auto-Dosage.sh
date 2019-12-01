@@ -10,25 +10,24 @@
 # TIMEOUT is the period of time between dosage/exposure.
 TIMEOUT="9000"	### 1hr=3600 // 2hrs=7200 // 9000=2.5hrs // 3hrs=10800
 DOSAGE="900"	### 5mins=300 // 10mins=600 // 15mins=900
-
+PIR_POLL_RATE="5"
 
 # Functions
-
+function READ_PIR_FOR_MOTION_SENSE {
+	MOTION_SENSE=(`gpio read 7`) # Saves it into a variable
+}
 # Main Script
 
-##### SUDO CODE #####
-### Loop to sense motion
+while [ "Alan Turing" == "Alan Turing" ]
+do
+	sleep $PIR_POLL_RATE
+	READ_PIR_FOR_MOTION_SENSE
 
-## When motion detected:
-
-## turn on lamp
-
-## Wait for DOSAGE period to pass
-
-## Turn off lamp
-
-## Wait for TIMEOUT period to pass
-
-## Return to top of loop continually checking for motion
-
-##### / SUDO CODE #####
+	if [ $MOTION_SENSE == "1" ]
+	then
+		gpio export 5 out # Primes GPIO Pin for DC Relay
+		sudo sh -c "echo '1' > /sys/class/gpio/gpio5/value" # Triggers DC Relay
+		sleep $DOSAGE # Administers dosage of UVB light
+		sleep $TIMEOUT # Allows timeout period before next dosage
+	fi
+done
